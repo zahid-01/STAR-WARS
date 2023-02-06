@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 
-import MoviesList from './components/MoviesList';
-import AddMovie from './components/AddMovie';
-import './App.css';
+import MoviesList from "./components/MoviesList";
+import AddMovie from "./components/AddMovie";
+import "./App.css";
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -13,19 +13,30 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://swapi.dev/api/films/');
+      const response = await fetch(
+        "https://start-wars-58d68-default-rtdb.asia-southeast1.firebasedatabase.app/films.json"
+      );
       if (!response.ok) {
-        throw new Error('Something went wrong!');
+        throw new Error("Something went wrong!");
       }
 
       const data = await response.json();
+      let movies = [];
+      for (const prop in data) {
+        movies.push({
+          id: prop,
+          title: data[prop].title,
+          openingText: data[prop].openingText,
+          releaseDate: data[prop].releaseDate,
+        });
+      }
 
-      const transformedMovies = data.results.map((movieData) => {
+      const transformedMovies = movies.map((movieData) => {
         return {
-          id: movieData.episode_id,
+          id: movieData.id,
           title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date,
+          openingText: movieData.openingText,
+          releaseDate: movieData.releaseDate,
         };
       });
       setMovies(transformedMovies);
@@ -39,8 +50,17 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
 
-  function addMovieHandler(movie) {
-    console.log(movie);
+  async function addMovieHandler(movie) {
+    const res = await fetch(
+      "https://start-wars-58d68-default-rtdb.asia-southeast1.firebasedatabase.app/films.json",
+      {
+        method: "POST",
+        mode: "cors",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(movie),
+      }
+    );
   }
 
   let content = <p>Found no movies.</p>;
